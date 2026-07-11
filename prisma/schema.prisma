@@ -1,0 +1,294 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CUSTOMER
+  BUSINESS_OWNER
+  ADMIN
+}
+
+enum BusinessType {
+  GAS_STATION
+  CAR_WASH
+  SERVICE_CENTER
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  NEEDS_CHANGES
+  REJECTED
+  SUSPENDED
+}
+
+enum BookingService {
+  CAR_WASH
+  OIL_CHANGE
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  PROCESSING
+  COMPLETED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentStatus {
+  UNPAID
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum NotificationType {
+  BOOKING
+  BUSINESS
+  ORDER
+  SYSTEM
+}
+
+model User {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  passwordHash String
+  role         Role      @default(CUSTOMER)
+  bookings     Booking[]
+  businesses   Business[] @relation("BusinessOwner")
+  favorites    Favorite[]
+  reviews      Review[]
+  orders       Order[]
+  notifications Notification[]
+  vehicles     Vehicle[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  emailVerifiedAt DateTime?
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  email     String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+  @@index([email])
+}
+
+model Business {
+  id              String          @id @default(cuid())
+  name            String
+  type            BusinessType
+  description     String          @db.Text
+  phone           String
+  email           String
+  website         String?
+  logoUrl         String?
+  coverUrl        String?
+  currency        String          @default("USD")
+  status          ApprovalStatus  @default(PENDING)
+  rejectionReason String?         @db.Text
+  ownerId         String
+  owner           User            @relation("BusinessOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  stations        Station[]
+  services        Service[]
+  reviews         Review[]
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@index([status])
+  @@index([ownerId])
+}
+
+model Service {
+  id          String   @id @default(cuid())
+  name        String
+  description String?  @db.Text
+  price       Decimal  @db.Decimal(8, 2)
+  duration    Int
+  active      Boolean  @default(true)
+  businessId  String
+  business    Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  slots       AvailabilitySlot[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([businessId])
+}
+
+model GasPrice {
+  id        String   @id @default(cuid())
+  fuelType  String   @unique
+  price     Decimal  @db.Decimal(8, 2)
+  unit      String   @default("L")
+  updatedAt DateTime @updatedAt
+}
+
+model Station {
+  id          String    @id @default(cuid())
+  name        String
+  address     String
+  city        String
+  country     String    @default("United States")
+  timezone    String    @default("UTC")
+  latitude    Decimal   @db.Decimal(10, 7)
+  longitude   Decimal   @db.Decimal(10, 7)
+  phone       String
+  imageUrl    String?
+  openingTime String    @default("00:00")
+  closingTime String    @default("23:59")
+  open24Hours Boolean   @default(true)
+  amenities   Json
+  bookings    Booking[]
+  businessId  String?
+  business    Business? @relation(fields: [businessId], references: [id], onDelete: SetNull)
+  favorites   Favorite[]
+  createdAt   DateTime  @default(now())
+}
+
+model Booking {
+  id           String         @id @default(cuid())
+  customerName String
+  email        String
+  phone        String
+  service      BookingService
+  scheduledAt  DateTime
+  vehicle      String
+  notes        String?        @db.Text
+  status       BookingStatus  @default(PENDING)
+  userId       String?
+  user         User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+  stationId    String
+  station      Station        @relation(fields: [stationId], references: [id], onDelete: Restrict)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@index([scheduledAt])
+  @@index([status])
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  description String   @db.Text
+  category    String
+  price       Decimal  @db.Decimal(8, 2)
+  stock       Int      @default(0)
+  imageUrl    String
+  featured    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  orderItems  OrderItem[]
+
+  @@index([category])
+}
+
+model Vehicle {
+  id        String   @id @default(cuid())
+  name      String
+  make      String
+  model     String
+  plate     String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  @@index([userId])
+}
+
+model AvailabilitySlot {
+  id        String   @id @default(cuid())
+  weekday   Int
+  startTime String
+  endTime   String
+  capacity  Int      @default(1)
+  active    Boolean  @default(true)
+  serviceId String
+  service   Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  @@unique([serviceId, weekday, startTime])
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  stationId String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  station   Station  @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  @@unique([userId, stationId])
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  rating     Int
+  comment    String?  @db.Text
+  userId     String
+  businessId String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  @@unique([userId, businessId])
+  @@index([businessId])
+}
+
+model Order {
+  id            String        @id @default(cuid())
+  status        OrderStatus   @default(PENDING)
+  paymentStatus PaymentStatus @default(UNPAID)
+  total         Decimal       @db.Decimal(10, 2)
+  userId        String?
+  user          User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  items         OrderItem[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  @@index([userId])
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  quantity  Int
+  unitPrice Decimal @db.Decimal(8, 2)
+  orderId   String
+  productId String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+  @@index([orderId])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  type      NotificationType
+  title     String
+  message   String           @db.Text
+  read      Boolean          @default(false)
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime         @default(now())
+  @@index([userId, read])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  action     String
+  entityType String
+  entityId   String
+  metadata   Json?
+  createdAt  DateTime @default(now())
+  @@index([entityType, entityId])
+}

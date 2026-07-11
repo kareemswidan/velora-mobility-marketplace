@@ -1,0 +1,1 @@
+"use client";export default function ErrorPage({reset}:{reset:()=>void}){return <section className="grid min-h-[75vh] place-items-center px-6 text-center"><div><p className="eyebrow">Something went wrong</p><h1 className="display mt-5 text-6xl">Let’s get you moving again.</h1><button onClick={reset} className="btn btn-gold mt-8">Try again</button></div></section>}

@@ -1,0 +1,1 @@
+import {prisma} from "@/lib/prisma";import {HomeExperience} from "@/components/HomeExperience";export const dynamic="force-dynamic";export default async function Home(){const prices=await prisma.gasPrice.findMany({orderBy:{price:"asc"}});return <HomeExperience prices={prices.map(p=>({id:p.id,fuelType:p.fuelType,price:String(p.price)}))}/>}

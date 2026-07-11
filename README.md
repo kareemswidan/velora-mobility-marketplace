@@ -107,4 +107,3 @@ For multi-instance production hosting, replace local uploads and in-memory rate 
 ## Verification
 
 `npm run check` runs automated tests and a full optimized production build. A successful build type-checks every page and API route.
-

@@ -1,0 +1,17 @@
+import {PrismaClient,Role} from "@prisma/client";import bcrypt from "bcryptjs";
+const db=new PrismaClient();
+async function main(){
+ const adminHash=await bcrypt.hash(process.env.ADMIN_PASSWORD||"VeloraAdmin2026!",12);
+ const ownerHash=await bcrypt.hash("OwnerDemo2026!",12);const customerHash=await bcrypt.hash("CustomerDemo2026!",12);
+ const admin=await db.user.upsert({where:{email:process.env.ADMIN_EMAIL||"admin@velora.energy"},update:{passwordHash:adminHash,role:Role.ADMIN},create:{name:"Platform Administrator",email:process.env.ADMIN_EMAIL||"admin@velora.energy",passwordHash:adminHash,role:Role.ADMIN}});
+ const owner=await db.user.upsert({where:{email:"owner@velora.demo"},update:{passwordHash:ownerHash,role:Role.BUSINESS_OWNER},create:{name:"Demo Business Owner",email:"owner@velora.demo",passwordHash:ownerHash,role:Role.BUSINESS_OWNER}});
+ await db.user.upsert({where:{email:"customer@velora.demo"},update:{passwordHash:customerHash,role:Role.CUSTOMER},create:{name:"Demo Customer",email:"customer@velora.demo",passwordHash:customerHash,role:Role.CUSTOMER}});
+ for(const item of [{fuelType:"Regular 95",price:1.89},{fuelType:"Performance 98",price:2.12},{fuelType:"Eco Diesel",price:1.76}])await db.gasPrice.upsert({where:{fuelType:item.fuelType},update:{price:item.price},create:item});
+ const existing=await db.business.findFirst({where:{ownerId:owner.id,name:"Velora Global Mobility"}});
+ if(!existing)await db.business.create({data:{name:"Velora Global Mobility",type:"GAS_STATION",description:"A globally inspired mobility hub combining energy, vehicle care and premium convenience.",phone:"+1 800 835 672",email:"owner@velora.demo",status:"APPROVED",currency:"USD",ownerId:owner.id,services:{create:[{name:"Signature Car Wash",description:"Premium exterior and interior care.",price:39,duration:45},{name:"Precision Oil Service",description:"Certified oil and filter replacement.",price:89,duration:60}]},stations:{create:[{name:"Velora Manhattan",address:"350 Fifth Avenue",city:"New York",country:"United States",timezone:"America/New_York",latitude:40.7484,longitude:-73.9857,phone:"+1 212 555 0101",amenities:["E-Mart","Coffee","Car Care"]},{name:"Velora Marina",address:"Marina Boulevard",city:"Singapore",country:"Singapore",timezone:"Asia/Singapore",latitude:1.2834,longitude:103.8607,phone:"+65 6555 0102",amenities:["E-Mart","EV Charging","Car Care"]},{name:"Velora Central",address:"Potsdamer Platz",city:"Berlin",country:"Germany",timezone:"Europe/Berlin",latitude:52.5096,longitude:13.376,phone:"+49 30 555 0103",amenities:["E-Mart","Coffee","EV Charging"]}]}}});
+ const products=[{name:"Midnight Detail Kit",description:"Premium interior and exterior care essentials.",category:"Car Care",price:38,stock:12,imageUrl:"/products/detail.png",featured:true},{name:"Velora Reserve Coffee",description:"Single-origin cold brew, bottled fresh.",category:"Refreshments",price:4.9,stock:32,imageUrl:"/products/coffee.png",featured:true},{name:"Mineral Water No. 8",description:"Still spring water in recyclable glass.",category:"Refreshments",price:2.8,stock:64,imageUrl:"/products/water.png",featured:false}];
+ for(const p of products){const found=await db.product.findFirst({where:{name:p.name}});if(found)await db.product.update({where:{id:found.id},data:p});else await db.product.create({data:p})}
+ await db.auditLog.create({data:{actorId:admin.id,action:"SEED_COMPLETED",entityType:"System",entityId:"global-demo",metadata:{version:2}}});
+ console.log("Global demo data ready");
+}
+main().finally(()=>db.$disconnect());

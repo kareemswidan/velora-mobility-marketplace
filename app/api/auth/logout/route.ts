@@ -1,0 +1,1 @@
+import {NextResponse} from "next/server";export async function POST(){const r=NextResponse.redirect(new URL("/login","http://localhost:3000"));r.cookies.set("velora_session","",{path:"/",maxAge:0});return r}

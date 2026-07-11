@@ -1,0 +1,2 @@
+export function money(value:unknown,currency=process.env.NEXT_PUBLIC_DEFAULT_CURRENCY||"USD",locale=process.env.NEXT_PUBLIC_DEFAULT_LOCALE||"en-US"){return new Intl.NumberFormat(locale,{style:"currency",currency,minimumFractionDigits:2}).format(Number(value))}
+export function dateTime(value:Date|string,locale=process.env.NEXT_PUBLIC_DEFAULT_LOCALE||"en-US",timeZone="UTC"){return new Intl.DateTimeFormat(locale,{dateStyle:"medium",timeStyle:"short",timeZone}).format(new Date(value))}
