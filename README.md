@@ -4,6 +4,10 @@ A production-oriented, multi-role full-stack marketplace for gas stations, car w
 
 **Product design and development:** Kareem Swidan
 
+[![CI](https://github.com/kareemswidan/velora-mobility-marketplace/actions/workflows/ci.yml/badge.svg)](https://github.com/kareemswidan/velora-mobility-marketplace/actions/workflows/ci.yml)
+
+Engineering documentation: [architecture and data model](docs/ARCHITECTURE.md) · [authentication and authorization](docs/AUTHORIZATION.md)
+
 ## Highlights
 
 - Customer, business-owner and platform-admin portals
