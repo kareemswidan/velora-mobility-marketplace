@@ -4,8 +4,6 @@ node_modules
 *.log
 work/
 outputs/
-.codex/
-.agents/
 tsconfig.tsbuildinfo
 public/uploads/*
 !public/uploads/.gitkeep
