@@ -7,3 +7,10 @@ outputs/
 tsconfig.tsbuildinfo
 public/uploads/*
 !public/uploads/.gitkeep
+
+# build + generated
+.open-next
+.wrangler
+lib/generated
+prisma/*.db
+prisma/*.db-journal

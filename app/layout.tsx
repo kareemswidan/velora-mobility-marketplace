@@ -3,6 +3,8 @@ import "./globals.css";
 import {Nav} from "@/components/Nav";
 import {Chatbot} from "@/components/Chatbot";
 import {I18nProvider} from "@/components/I18nProvider";
+import {getLocale} from "@/lib/i18n-server";
+import {translator} from "@/lib/i18n";
 
 export const metadata:Metadata={
   metadataBase:new URL(process.env.NEXT_PUBLIC_APP_URL||"http://localhost:3000"),
@@ -15,10 +17,18 @@ export const metadata:Metadata={
 };
 export const viewport:Viewport={themeColor:"#06110d",colorScheme:"dark"};
 
-export default function Layout({children}:{children:React.ReactNode}){
-  return <html lang="en" translate="no" className="notranslate" suppressHydrationWarning>
-    <body translate="no" suppressHydrationWarning>
-      <I18nProvider>
+export default async function Layout({children}:{children:React.ReactNode}){
+  const locale=await getLocale();
+  const rtl=locale==="ar";
+  const t=translator(locale);
+  return <html lang={locale} dir={rtl?"rtl":"ltr"} suppressHydrationWarning>
+    <head>
+      <link rel="preconnect" href="https://fonts.googleapis.com"/>
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin=""/>
+      <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    </head>
+    <body suppressHydrationWarning>
+      <I18nProvider initialLocale={locale}>
         <Nav/>
         <main>{children}</main>
         <Chatbot/>
@@ -26,7 +36,7 @@ export default function Layout({children}:{children:React.ReactNode}){
       <footer className="border-t border-white/10 px-6 py-10">
         <div className="mx-auto flex max-w-7xl flex-col justify-between gap-3 text-xs text-white/35 md:flex-row">
           <span>© {new Date().getFullYear()} Velora Mobility</span>
-          <span>Global mobility · Available everywhere</span>
+          <span>{t("brand_tagline")}</span>
         </div>
       </footer>
     </body>

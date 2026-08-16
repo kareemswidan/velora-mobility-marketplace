@@ -1,23 +1,39 @@
 "use client";
 
 import {createContext,useContext,useEffect,useState} from "react";
+import {useRouter} from "next/navigation";
+import {LOCALE_COOKIE,normalizeLocale,translator,type Key,type Locale} from "@/lib/i18n";
 
-type Locale="en"|"ar";
-type Dictionary={home:string;explore:string;book:string;store:string;business:string;signin:string;language:string};
+function readCookie():Locale{
+  if(typeof document==="undefined")return "en";
+  const hit=document.cookie.split("; ").find(c=>c.startsWith(`${LOCALE_COOKIE}=`));
+  return normalizeLocale(hit?.split("=")[1]);
+}
 
-const words:Record<Locale,Dictionary>={
-  en:{home:"Home",explore:"Explore",book:"Book",store:"E-Mart",business:"For business",signin:"Sign in",language:"العربية"},
-  ar:{home:"الرئيسية",explore:"استكشف",book:"احجز",store:"المتجر",business:"للأعمال",signin:"دخول",language:"English"}
-};
+const I18nContext=createContext<{locale:Locale;setLocale:(l:Locale)=>void;t:(k:Key)=>string}>({
+  locale:"en",setLocale:()=>{},t:translator("en")
+});
 
-const I18nContext=createContext({locale:"en" as Locale,setLocale:(_:Locale)=>{},t:(key:keyof Dictionary)=>words.en[key]});
+export function I18nProvider({initialLocale="en",children}:{initialLocale?:Locale;children:React.ReactNode}){
+  const router=useRouter();
+  const[locale,setValue]=useState<Locale>(initialLocale);
 
-export function I18nProvider({children}:{children:React.ReactNode}){
-  const[locale,setValue]=useState<Locale>("en");
-  useEffect(()=>{if(localStorage.getItem("velora_locale")==="ar")setValue("ar")},[]);
-  useEffect(()=>{document.documentElement.lang=locale;document.documentElement.dir=locale==="ar"?"rtl":"ltr"},[locale]);
-  function setLocale(value:Locale){localStorage.setItem("velora_locale",value);setValue(value)}
-  return <I18nContext.Provider value={{locale,setLocale,t:key=>words[locale][key]}}>{children}</I18nContext.Provider>;
+  // a stale cookie from a previous visit wins over the server default
+  useEffect(()=>{const c=readCookie();if(c!==locale)setValue(c)},[]);
+
+  useEffect(()=>{
+    document.documentElement.lang=locale;
+    document.documentElement.dir=locale==="ar"?"rtl":"ltr";
+  },[locale]);
+
+  function setLocale(value:Locale){
+    // one year, root path, so server components read the same value
+    document.cookie=`${LOCALE_COOKIE}=${value};path=/;max-age=31536000;samesite=lax`;
+    setValue(value);
+    router.refresh(); // re-render the server components in the new language
+  }
+
+  return <I18nContext.Provider value={{locale,setLocale,t:translator(locale)}}>{children}</I18nContext.Provider>;
 }
 
 export const useI18n=()=>useContext(I18nContext);

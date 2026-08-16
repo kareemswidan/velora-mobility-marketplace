@@ -1,0 +1,19 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "velora-mobility",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2025-08-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "velora-mobility-db",
+      "database_id": "d4b2030f-9f70-4412-9b0d-1b6d44ebce54"
+    }
+  ],
+  "observability": {"enabled": true}
+}

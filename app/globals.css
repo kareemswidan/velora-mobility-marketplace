@@ -18,3 +18,20 @@ input[type="number"]{-moz-appearance:textfield}input[type="number"]::-webkit-out
 .aurora{position:absolute;border-radius:999px;filter:blur(70px);pointer-events:none}.grid-lines{background-image:linear-gradient(#ffffff08 1px,transparent 1px),linear-gradient(90deg,#ffffff08 1px,transparent 1px);background-size:48px 48px}
 .marquee{animation:marquee 28s linear infinite}@keyframes marquee{to{transform:translateX(-50%)}}
 @media(max-width:640px){.display{letter-spacing:-.035em}}
+
+/* --- Arabic typography -----------------------------------------------------
+   The Latin stack (Inter / Bodoni MT) carries no Arabic glyphs, so Arabic text
+   used to fall back to whatever the OS offered. IBM Plex Sans Arabic is loaded
+   as a real face and applied for both body and display when the page is RTL. */
+html[lang="ar"] body,
+html[lang="ar"] .display,
+html[lang="ar"] .font-serif{
+  font-family:"IBM Plex Sans Arabic",var(--font-sans);
+  letter-spacing:0;
+}
+html[lang="ar"] .display{line-height:1.22}
+html[lang="ar"] h1,html[lang="ar"] h2,html[lang="ar"] h3{letter-spacing:0}
+/* Latin fragments inside an RTL page keep their own direction, so trailing
+   punctuation does not jump to the front of the line. */
+html[lang="ar"] .ltr,
+html[lang="ar"] [data-ltr]{direction:ltr;unicode-bidi:isolate;display:inline-block}
