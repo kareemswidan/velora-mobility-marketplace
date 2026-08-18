@@ -1,65 +1,20 @@
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+  runtime  = "workerd"
+  moduleFormat = "esm"
+}
+
+generator nodeClient {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma-node"
+  runtime  = "nodejs"
+  moduleFormat = "cjs"
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
-}
-
-enum Role {
-  CUSTOMER
-  BUSINESS_OWNER
-  ADMIN
-}
-
-enum BusinessType {
-  GAS_STATION
-  CAR_WASH
-  SERVICE_CENTER
-}
-
-enum ApprovalStatus {
-  PENDING
-  APPROVED
-  NEEDS_CHANGES
-  REJECTED
-  SUSPENDED
-}
-
-enum BookingService {
-  CAR_WASH
-  OIL_CHANGE
-}
-
-enum BookingStatus {
-  PENDING
-  CONFIRMED
-  COMPLETED
-  CANCELLED
-}
-
-enum OrderStatus {
-  PENDING
-  PAID
-  PROCESSING
-  COMPLETED
-  CANCELLED
-  REFUNDED
-}
-
-enum PaymentStatus {
-  UNPAID
-  PAID
-  FAILED
-  REFUNDED
-}
-
-enum NotificationType {
-  BOOKING
-  BUSINESS
-  ORDER
-  SYSTEM
 }
 
 model User {
@@ -67,7 +22,7 @@ model User {
   name         String
   email        String    @unique
   passwordHash String
-  role         Role      @default(CUSTOMER)
+  role         String      @default("CUSTOMER")
   bookings     Booking[]
   businesses   Business[] @relation("BusinessOwner")
   favorites    Favorite[]
@@ -93,16 +48,18 @@ model PasswordResetToken {
 model Business {
   id              String          @id @default(cuid())
   name            String
-  type            BusinessType
-  description     String          @db.Text
+  nameAr          String?
+  type            String
+  description     String
+  descriptionAr   String?
   phone           String
   email           String
   website         String?
   logoUrl         String?
   coverUrl        String?
   currency        String          @default("USD")
-  status          ApprovalStatus  @default(PENDING)
-  rejectionReason String?         @db.Text
+  status          String  @default("PENDING")
+  rejectionReason String?
   ownerId         String
   owner           User            @relation("BusinessOwner", fields: [ownerId], references: [id], onDelete: Cascade)
   stations        Station[]
@@ -118,8 +75,10 @@ model Business {
 model Service {
   id          String   @id @default(cuid())
   name        String
-  description String?  @db.Text
-  price       Decimal  @db.Decimal(8, 2)
+  nameAr      String?
+  description String?
+  descriptionAr String?
+  price       Decimal
   duration    Int
   active      Boolean  @default(true)
   businessId  String
@@ -134,7 +93,8 @@ model Service {
 model GasPrice {
   id        String   @id @default(cuid())
   fuelType  String   @unique
-  price     Decimal  @db.Decimal(8, 2)
+  fuelTypeAr String?
+  price     Decimal
   unit      String   @default("L")
   updatedAt DateTime @updatedAt
 }
@@ -142,18 +102,22 @@ model GasPrice {
 model Station {
   id          String    @id @default(cuid())
   name        String
+  nameAr      String?
   address     String
+  addressAr   String?
   city        String
+  cityAr      String?
   country     String    @default("United States")
+  countryAr   String?
   timezone    String    @default("UTC")
-  latitude    Decimal   @db.Decimal(10, 7)
-  longitude   Decimal   @db.Decimal(10, 7)
+  latitude    Decimal
+  longitude   Decimal
   phone       String
   imageUrl    String?
   openingTime String    @default("00:00")
   closingTime String    @default("23:59")
   open24Hours Boolean   @default(true)
-  amenities   Json
+  amenities   String    @default("[]")
   bookings    Booking[]
   businessId  String?
   business    Business? @relation(fields: [businessId], references: [id], onDelete: SetNull)
@@ -166,11 +130,11 @@ model Booking {
   customerName String
   email        String
   phone        String
-  service      BookingService
+  service      String
   scheduledAt  DateTime
   vehicle      String
-  notes        String?        @db.Text
-  status       BookingStatus  @default(PENDING)
+  notes        String?
+  status       String  @default("PENDING")
   userId       String?
   user         User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
   stationId    String
@@ -185,9 +149,12 @@ model Booking {
 model Product {
   id          String   @id @default(cuid())
   name        String
-  description String   @db.Text
+  nameAr      String?
+  description String
+  descriptionAr String?
   category    String
-  price       Decimal  @db.Decimal(8, 2)
+  categoryAr  String?
+  price       Decimal
   stock       Int      @default(0)
   imageUrl    String
   featured    Boolean  @default(false)
@@ -235,7 +202,7 @@ model Favorite {
 model Review {
   id         String   @id @default(cuid())
   rating     Int
-  comment    String?  @db.Text
+  comment    String?
   userId     String
   businessId String
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -248,9 +215,9 @@ model Review {
 
 model Order {
   id            String        @id @default(cuid())
-  status        OrderStatus   @default(PENDING)
-  paymentStatus PaymentStatus @default(UNPAID)
-  total         Decimal       @db.Decimal(10, 2)
+  status        String   @default("PENDING")
+  paymentStatus String @default("UNPAID")
+  total         Decimal
   userId        String?
   user          User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
   items         OrderItem[]
@@ -262,7 +229,7 @@ model Order {
 model OrderItem {
   id        String  @id @default(cuid())
   quantity  Int
-  unitPrice Decimal @db.Decimal(8, 2)
+  unitPrice Decimal
   orderId   String
   productId String
   order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
@@ -272,9 +239,9 @@ model OrderItem {
 
 model Notification {
   id        String           @id @default(cuid())
-  type      NotificationType
+  type      String
   title     String
-  message   String           @db.Text
+  message   String
   read      Boolean          @default(false)
   userId    String
   user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -288,7 +255,7 @@ model AuditLog {
   action     String
   entityType String
   entityId   String
-  metadata   Json?
+  metadata   String?
   createdAt  DateTime @default(now())
   @@index([entityType, entityId])
 }

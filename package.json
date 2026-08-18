@@ -1,1 +1,44 @@
-{"name":"velora-mobility","version":"2.0.0","private":true,"scripts":{"dev":"next dev","build":"prisma generate && next build","start":"next start","lint":"next lint","db:push":"prisma db push","db:seed":"tsx prisma/seed.ts","test":"tsx --test tests/*.test.ts","check":"npm run test && npm run build"},"dependencies":{"@prisma/client":"^5.22.0","bcryptjs":"^2.4.3","framer-motion":"^11.11.17","jose":"^5.9.6","lucide-react":"^0.468.0","next":"^14.2.21","react":"^18.3.1","react-dom":"^18.3.1"},"devDependencies":{"@types/bcryptjs":"^2.4.6","@types/node":"^22.10.2","@types/react":"^18.3.12","@types/react-dom":"^18.3.1","autoprefixer":"^10.4.20","postcss":"^8.4.49","prisma":"^5.22.0","tailwindcss":"^3.4.16","tsx":"^4.19.2","typescript":"^5.7.2"}}
+{
+  "name": "velora-mobility",
+  "version": "2.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "prisma generate && next build --turbopack",
+    "start": "next start",
+    "lint": "next lint",
+    "db:push": "prisma db push",
+    "db:seed": "tsx prisma/seed.ts",
+    "test": "tsx --test tests/*.test.ts",
+    "check": "npm run test && npm run build",
+    "cf:build": "opennextjs-cloudflare build",
+    "cf:deploy": "opennextjs-cloudflare deploy",
+    "cf:preview": "opennextjs-cloudflare preview",
+    "d1:schema": "prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma --script > migrations/0001_init.sql"
+  },
+  "dependencies": {
+    "@prisma/adapter-d1": "^6.19.3",
+    "@prisma/client": "^6.19.3",
+    "bcryptjs": "^2.4.3",
+    "framer-motion": "^11.11.17",
+    "jose": "^5.9.6",
+    "lucide-react": "^0.468.0",
+    "next": "^15.5.23",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260816.1",
+    "@opennextjs/cloudflare": "^1.20.2",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "prisma": "^6.19.3",
+    "tailwindcss": "^3.4.16",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}
