@@ -27,7 +27,7 @@ input[type="number"]{-moz-appearance:textfield}input[type="number"]::-webkit-out
    does nothing, and Arabic needs more leading for its ascenders and marks. Amiri is
    loaded through next/font as --font-arabic, so nothing is fetched at runtime.
    These rules only apply while the document is right-to-left, so English is untouched. */
-[dir="rtl"]{font-family:var(--font-arabic),"Segoe UI",Tahoma,serif}
+[dir="rtl"],[dir="rtl"] body{font-family:var(--font-arabic),"Segoe UI",Tahoma,serif}
 [dir="rtl"] .display,[dir="rtl"] .font-serif,[dir="rtl"] b.font-serif{font-family:var(--font-arabic),"Segoe UI",serif;letter-spacing:0}
 [dir="rtl"] .btn,[dir="rtl"] .field,[dir="rtl"] input,[dir="rtl"] select,[dir="rtl"] textarea{font-family:var(--font-arabic),"Segoe UI",Tahoma,serif}
 [dir="rtl"] .display{line-height:1.3}
