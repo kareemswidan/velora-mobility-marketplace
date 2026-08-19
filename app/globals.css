@@ -35,10 +35,21 @@ input[type="number"]{-moz-appearance:textfield}input[type="number"]::-webkit-out
 [dir="rtl"] h1.display{font-size:clamp(2.4rem,4.4vw,4.5rem)}
 [dir="rtl"] h2.display{font-size:clamp(1.9rem,3vw,3rem)}
 [dir="rtl"] .eyebrow{font-size:.85rem;letter-spacing:0;text-transform:none;line-height:1.7}
-[dir="rtl"] .marquee{letter-spacing:.06em;text-transform:none}
-[dir="rtl"] p{line-height:1.95;font-size:1.05em}
-[dir="rtl"] .text-white\/55,[dir="rtl"] .text-white\/50,[dir="rtl"] .text-white\/42{color:#ffffffc4}
-[dir="rtl"] .text-white\/35,[dir="rtl"] .text-white\/30{color:#ffffffab}
+/* Arabic has no letter case, and joins its letters, so neither casing nor
+   tracking has anything to do here. */
+[dir="rtl"] *{text-transform:none}
+[dir="rtl"] .marquee{letter-spacing:0}
+[dir="rtl"] p{line-height:1.95}
+/* Tailwind sets sizes with single-class utilities, which a [dir] rule
+   outranks, so lifting every paragraph flattened the scale rather than
+   raising the small end of it: on the store a 10px stock count and 14px body
+   copy both landed on 16.8px. The lift now applies only where no size utility
+   was asked for, and the utilities that are too small for Arabic get their
+   own floor. Measured across /, /stations, /store, /booking and /partners. */
+[dir="rtl"] p:not([class*="text-"]){font-size:1.05em}
+[dir="rtl"] .text-\[9px\],[dir="rtl"] .text-\[10px\],[dir="rtl"] .text-xs{font-size:12.5px}
+[dir="rtl"] .text-white\/55,[dir="rtl"] .text-white\/50,[dir="rtl"] .text-white\/45,[dir="rtl"] .text-white\/42,[dir="rtl"] .text-white\/40{color:#ffffffc4}
+[dir="rtl"] .text-white\/35,[dir="rtl"] .text-white\/30,[dir="rtl"] .text-white\/25{color:#ffffffab}
 /* Latin fragments inside an RTL page keep their own direction, so trailing
    punctuation does not jump to the front of the line. */
 [dir="rtl"] .ltr,[dir="rtl"] [data-ltr]{direction:ltr;unicode-bidi:isolate;display:inline-block}
