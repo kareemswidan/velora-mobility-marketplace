@@ -2,8 +2,13 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "velora-mobility",
   "main": ".open-next/worker.js",
-  "compatibility_date": "2025-08-01",
+  "compatibility_date": "2026-08-01",
   "compatibility_flags": ["nodejs_compat"],
+  "vars": {
+    "NEXT_PUBLIC_APP_URL": "https://velora-mobility.kareemswidan11.workers.dev",
+    "NEXT_PUBLIC_DEFAULT_CURRENCY": "USD",
+    "NEXT_PUBLIC_DEFAULT_LOCALE": "en-US"
+  },
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
