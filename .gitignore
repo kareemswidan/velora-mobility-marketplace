@@ -12,5 +12,6 @@ public/uploads/*
 .open-next
 .wrangler
 lib/generated
+worker-configuration.d.ts
 prisma/*.db
 prisma/*.db-journal
