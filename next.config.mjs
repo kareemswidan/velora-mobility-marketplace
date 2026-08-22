@@ -1,6 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig={
   reactStrictMode:true,
+  // Keep Next.js inside this repository even when a parent directory contains
+  // another lockfile (common on Windows developer machines and CI workspaces).
+  outputFileTracingRoot:process.cwd(),
+  turbopack:{root:process.cwd()},
   // Let the Worker bundler handle the Prisma runtime and its WASM engine.
   serverExternalPackages:["@prisma/client","@prisma/adapter-d1"],
   // The engine-free Prisma client ships a WebAssembly query engine.
